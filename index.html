@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Уран Хийц | Захиалга</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        /* Зургийн хэсэг */
+        .product-image { width: 100%; height: 300px; background: #eee; border-radius: 15px; margin-bottom: 20px; object-fit: cover; display: block; }
+        
+        h2 { text-align: center; color: #1a1a1a; margin-bottom: 5px; }
+        .price-tag { text-align: center; color: #c5a059; font-size: 24px; font-weight: bold; margin-bottom: 25px; }
+        
+        .size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .size-item { display: flex; justify-content: space-between; align-items: center; background: #f1f3f5; padding: 10px 15px; border-radius: 10px; }
+        .size-item input { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; text-align: center; font-size: 16px; }
+
+        .delivery-section { background: #e7f5ff; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid #228be6; }
+        .total-section { background: #fff9db; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid #fab005; }
+        
+        input[type="text"], input[type="tel"] { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #dee2e6; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn-submit { width: 100%; padding: 18px; background: #1a1a1a; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-submit:disabled { background: #adb5bd; cursor: not-allowed; }
+        .payment-note { font-size: 13px; color: #868e96; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=2012&auto=format&fit=crop" alt="Гар хийцийн гутал" class="product-image">
+
+    <h2>Уран Хийц</h2>
+    <p class="price-tag">250,000 ₮</p>
+
+    <div class="size-grid">
+        <div class="size-item"><span>38 размер</span> <input type="number" class="qty" data-size="38" value="0" min="0"></div>
+        <div class="size-item"><span>39 размер</span> <input type="number" class="qty" data-size="39" value="0" min="0"></div>
+        <div class="size-item"><span>40 размер</span> <input type="number" class="qty" data-size="40" value="0" min="0"></div>
+        <div class="size-item"><span>41 размер</span> <input type="number" class="qty" data-size="41" value="0" min="0"></div>
+        <div class="size-item"><span>42 размер</span> <input type="number" class="qty" data-size="42" value="0" min="0"></div>
+        <div class="size-item"><span>43 размер</span> <input type="number" class="qty" data-size="43" value="0" min="0"></div>
+    </div>
+
+    <div class="delivery-section">
+        <label style="display: flex; align-items: center; font-weight: bold; cursor: pointer;">
+            <input type="checkbox" id="delivery-check" style="width: 20px; height: 20px; margin-right: 10px;"> Хүргэлт авах (+15,000 ₮)
+        </label>
+        <input type="text" id="address" placeholder="Хүргэлтийн хаяг бичнэ үү" style="display: none;">
+    </div>
+
+    <div class="total-section">
+        <p style="margin: 0; font-size: 18px;">Нийт гутал: <span id="total-qty">0</span> ш</p>
+        <p style="margin: 5px 0 0 0; font-size: 22px; font-weight: bold;">Нийт дүн: <span id="total-price">0</span> ₮</p>
+    </div>
+
+    <form name="orders" method="POST" data-netlify="true" action="/">
+        <input type="hidden" name="order_details" id="hidden-details">
+        <input type="hidden" name="final_amount" id="hidden-total">
+        
+        <input type="text" name="customer_name" placeholder="Таны нэр" required>
+        <input type="tel" name="customer_phone" placeholder="Утасны дугаар" required>
+        
+        <button type="submit" id="submit-btn" class="btn-submit" disabled>Захиалга өгөх</button>
+    </form>
+    
+    <p class="payment-note">Хаан банк: 5000XXXXXX (Б. Энхсайхан)<br>Утга: Утасны дугаараа бичнэ үү.</p>
+</div>
+
+<script>
+    const price = 250000;
+    const deliveryPrice = 15000;
+    const inputs = document.querySelectorAll('.qty');
+    const deliveryCheck = document.getElementById('delivery-check');
+
+    function update() {
+        let count = 0;
+        let details = "";
+        
+        inputs.forEach(i => {
+            let v = parseInt(i.value) || 0;
+            if(v > 0) {
+                count += v;
+                details += i.dataset.size + "р:" + v + "ш ";
+            }
+        });
+
+        let delivery = deliveryCheck.checked ? deliveryPrice : 0;
+        document.getElementById('address').style.display = deliveryCheck.checked ? 'block' : 'none';
+
+        const final = (count * price) + delivery;
+        
+        document.getElementById('total-qty').innerText = count;
+        document.getElementById('total-price').innerText = final.toLocaleString();
+        
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = count === 0;
+        if(count > 0) btn.innerText = "Захиалга илгээх";
+        else btn.innerText = "Захиалга өгөх";
+
+        document.getElementById('hidden-details').value = details + (deliveryCheck.checked ? "| Хүргэлттэй" : "");
+        document.getElementById('hidden-total').value = final.toLocaleString() + " ₮";
+    }
+
+    inputs.forEach(el => el.addEventListener('input', update));
+    deliveryCheck.addEventListener('change', update);
+</script>
+
+</body>
+</html>
