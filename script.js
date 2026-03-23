@@ -54,12 +54,19 @@ function calc() {
     const isDel = document.getElementById('del-check').checked;
     const name = document.getElementById('p-name').value.trim();
     const phone = document.getElementById('p-phone').value.trim();
+    const email = document.getElementById('p-email').value.trim();
+    
     document.getElementById('address').style.display = isDel ? 'block' : 'none';
+    
     let totalQty = 0;
     Object.values(cart).forEach(q => totalQty += q);
     const totalAmount = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
+    
     document.getElementById('res-total').innerText = totalAmount.toLocaleString();
-    document.getElementById('submit-btn').disabled = !(totalQty > 0 && name && phone);
+    
+    // Бөглөх ёстой талбарууд болон Имэйл зөв эсэхийг шалгана
+    const isEmailValid = email.includes('@') && email.includes('.');
+    document.getElementById('submit-btn').disabled = !(totalQty > 0 && name && phone && isEmailValid);
     document.getElementById('pay-total-val').innerText = totalAmount.toLocaleString() + "₮";
 }
 
@@ -83,6 +90,7 @@ function sendOrder() {
         order_id: currentOrderID,
         from_name: document.getElementById('p-name').value,
         phone: document.getElementById('p-phone').value,
+        user_email: document.getElementById('p-email').value, // Auto-Reply-д ашиглагдана
         order_details: orderDetails,
         address: document.getElementById('address').value || "Хүргэлтгүй",
         total_price: document.getElementById('res-total').innerText + "₮"
@@ -92,8 +100,10 @@ function sendOrder() {
         .then(() => {
             document.getElementById('pay-order-id').innerText = currentOrderID;
             document.getElementById('paymentModal').style.display = 'flex';
+            
             const qrData = `Bank:KhasBank|Acc:5003793719|Amount:${templateParams.total_price}|Msg:${currentOrderID}`;
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+            
             btn.innerText = langData[currentLang].btnReady;
             btn.disabled = false;
         });
@@ -108,6 +118,7 @@ function notifyPaymentSent() {
         order_id: currentOrderID,
         from_name: document.getElementById('p-name').value,
         phone: document.getElementById('p-phone').value,
+        user_email: document.getElementById('p-email').value,
         order_details: "Хэрэглэгч төлбөрөө шилжүүлсэн гэж мэдэгдлээ. Дансаа шалгана уу."
     };
 
@@ -118,7 +129,7 @@ function notifyPaymentSent() {
                     <div style="font-size: 50px; color: #25D366; margin-bottom: 15px;">✓</div>
                     <h2 style="color: #d4af37; margin-bottom: 10px;">БАЯРЛАЛАА!</h2>
                     <p style="font-size: 14px; color: #fff;">Мэдэгдэл илгээгдлээ. Бид төлбөрийг шалгаад тантай эргэж холбогдох болно.</p>
-                    <p style="margin-top: 20px; font-size: 12px; color: #777;">Дугаар: ${currentOrderID}</p>
+                    <p style="margin-top: 20px; font-size: 12px; color: #777;">Захиалгын дугаар: ${currentOrderID}</p>
                     <button onclick="window.location.reload()" style="margin-top: 25px; width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 10px; cursor: pointer;">Дуусгах</button>
                 </div>
             `;
