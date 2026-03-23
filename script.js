@@ -64,9 +64,14 @@ function calc() {
     
     document.getElementById('res-total').innerText = totalAmount.toLocaleString();
     
-    // Бөглөх ёстой талбарууд болон Имэйл зөв эсэхийг шалгана
+    // ИМЭЙЛ ШАЛГАХ ЛОГИК
     const isEmailValid = email.includes('@') && email.includes('.');
-    document.getElementById('submit-btn').disabled = !(totalQty > 0 && name && phone && isEmailValid);
+    const canSubmit = totalQty > 0 && name.length > 1 && phone.length >= 8 && isEmailValid;
+    
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = !canSubmit;
+    submitBtn.style.opacity = canSubmit ? "1" : "0.5";
+    
     document.getElementById('pay-total-val').innerText = totalAmount.toLocaleString() + "₮";
 }
 
@@ -90,20 +95,19 @@ function sendOrder() {
         order_id: currentOrderID,
         from_name: document.getElementById('p-name').value,
         phone: document.getElementById('p-phone').value,
-        user_email: document.getElementById('p-email').value, // Auto-Reply-д ашиглагдана
+        user_email: document.getElementById('p-email').value,
         order_details: orderDetails,
         address: document.getElementById('address').value || "Хүргэлтгүй",
         total_price: document.getElementById('res-total').innerText + "₮"
     };
 
-    emailjs.send('service_izdours', 'template_ix01rik', templateParams)
+    // ТАНЫ ТEMPLATE ID: g0dk3hw
+    emailjs.send('service_izdours', 'g0dk3hw', templateParams)
         .then(() => {
             document.getElementById('pay-order-id').innerText = currentOrderID;
             document.getElementById('paymentModal').style.display = 'flex';
-            
             const qrData = `Bank:KhasBank|Acc:5003793719|Amount:${templateParams.total_price}|Msg:${currentOrderID}`;
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
-            
             btn.innerText = langData[currentLang].btnReady;
             btn.disabled = false;
         });
@@ -122,14 +126,14 @@ function notifyPaymentSent() {
         order_details: "Хэрэглэгч төлбөрөө шилжүүлсэн гэж мэдэгдлээ. Дансаа шалгана уу."
     };
 
-    emailjs.send('service_izdours', 'template_ix01rik', params)
+    emailjs.send('service_izdours', 'g0dk3hw', params)
         .then(() => {
             document.getElementById('modal-body').innerHTML = `
                 <div style="padding: 30px 10px; text-align: center;">
                     <div style="font-size: 50px; color: #25D366; margin-bottom: 15px;">✓</div>
                     <h2 style="color: #d4af37; margin-bottom: 10px;">БАЯРЛАЛАА!</h2>
                     <p style="font-size: 14px; color: #fff;">Мэдэгдэл илгээгдлээ. Бид төлбөрийг шалгаад тантай эргэж холбогдох болно.</p>
-                    <p style="margin-top: 20px; font-size: 12px; color: #777;">Захиалгын дугаар: ${currentOrderID}</p>
+                    <p style="margin-top: 20px; font-size: 12px; color: #777;">Дугаар: ${currentOrderID}</p>
                     <button onclick="window.location.reload()" style="margin-top: 25px; width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 10px; cursor: pointer;">Дуусгах</button>
                 </div>
             `;
