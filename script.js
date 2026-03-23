@@ -1,20 +1,22 @@
 const unitPrice = 250000;
 const delFee = 15000;
 let cart = {};
-const items = ["Сонгодог Лофер", "Монгол Гутал", "Ажлын Ботинк", "Оксфорд Гутал", "Чөлөөт Пүүз", "Хагас Түрийтэй", "Зуны Мокасин", "Спортын Хөнгөн", "Гоёлын Ботинк", "Өвлийн Дулаан"];
+const items = ["Сонгодог 3D Лофер", "Монгол Гутал", "Ажлын Ботинк", "Оксфорд Гутал", "Чөлөөт Пүүз", "Хагас Түрийтэй", "Зуны Мокасин", "Спортын Хөнгөн", "Гоёлын Ботинк", "Өвлийн Дулаан"];
 
-// Бүтээгдэхүүнийг дэлгэцэнд гаргах
 function renderProducts() {
     const list = document.getElementById('product-list');
-    if (!list) return;
-    list.innerHTML = items.map((name, i) => `
-        <div class="product-card">
+    // 0-р индекс нь 3D модель тул 1-ээс эхлэн бусад зургуудыг нэмнэ
+    for (let i = 1; i < items.length; i++) {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
             <img src="https://picsum.photos/400/500?random=${i}" style="width:100%; border-radius:12px;">
-            <h4>${name}</h4>
-            <div style="color:#d4af37;">${unitPrice.toLocaleString()}₮</div>
+            <h4>${items[i]}</h4>
+            <div style="color:#d4af37; margin-bottom:5px;">${unitPrice.toLocaleString()}₮</div>
             <input type="number" min="0" placeholder="Тоо ширхэг" oninput="updateCart(${i}, this.value)">
-        </div>
-    `).join('');
+        `;
+        list.appendChild(card);
+    }
 }
 
 function updateCart(id, val) {
@@ -31,21 +33,21 @@ function calc() {
     let totalQty = 0;
     Object.values(cart).forEach(q => totalQty += q);
     
-    const total = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
-    const resTotal = document.getElementById('res-total');
-    if (resTotal) resTotal.innerText = total.toLocaleString();
+    // Төлбөр тооцоолох: Бараанууд + (Хүргэлт байгаа бол)
+    const subTotal = totalQty * unitPrice;
+    const finalTotal = subTotal + (isDel && totalQty > 0 ? delFee : 0);
+    
+    document.getElementById('res-total').innerText = finalTotal.toLocaleString();
     
     const name = document.getElementById('p-name').value.trim();
     const phone = document.getElementById('p-phone').value.trim();
     const email = document.getElementById('p-email').value.trim();
     
-    // Баталгаажуулалт: Нэр, Утас (8+ орон), Имэйл (@)
+    // Захиалах товчийг идэвхжүүлэх шалгуур
     const canSubmit = totalQty > 0 && name !== "" && phone.length >= 8 && email.includes('@');
     const btn = document.getElementById('submit-btn');
-    if (btn) {
-        btn.disabled = !canSubmit;
-        btn.style.opacity = canSubmit ? "1" : "0.5";
-    }
+    btn.disabled = !canSubmit;
+    btn.style.opacity = canSubmit ? "1" : "0.5";
 }
 
 function sendOrder() {
@@ -68,15 +70,13 @@ function sendOrder() {
         order_id: "#UK-" + Math.floor(1000 + Math.random() * 9000)
     };
 
-    // EMAILJS РУУ ИЛГЭЭХ ХЭСЭГ
     emailjs.send("service_izdours", "template_ix01rik", params)
-    .then(function(res) {
-        alert("Захиалга амжилттай! Бид тантай удахгүй холбогдох болно.");
+    .then(function() {
+        alert("Захиалга амжилттай илгээгдлээ! Тантай удахгүй холбогдох болно.");
         window.location.reload();
     })
     .catch(function(err) {
-        console.error("EmailJS Error:", err);
-        alert("Алдаа гарлаа: " + (err.text || "ID буруу эсвэл холболт тасарлаа."));
+        alert("Алдаа гарлаа: " + JSON.stringify(err));
         btn.innerText = "ЗАХИАЛАХ";
         btn.disabled = false;
     });
