@@ -6,6 +6,7 @@ const items = ["Сонгодог Лофер", "Монгол Гутал", "Ажл
 // Бүтээгдэхүүнийг дэлгэцэнд гаргах
 function renderProducts() {
     const list = document.getElementById('product-list');
+    if (!list) return;
     list.innerHTML = items.map((name, i) => `
         <div class="product-card">
             <img src="https://picsum.photos/400/500?random=${i}" style="width:100%; border-radius:12px;">
@@ -24,20 +25,27 @@ function updateCart(id, val) {
 
 function calc() {
     const isDel = document.getElementById('del-check').checked;
-    document.getElementById('address').style.display = isDel ? 'block' : 'none';
+    const addressInput = document.getElementById('address');
+    if (addressInput) addressInput.style.display = isDel ? 'block' : 'none';
 
     let totalQty = 0;
     Object.values(cart).forEach(q => totalQty += q);
     
     const total = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
-    document.getElementById('res-total').innerText = total.toLocaleString();
+    const resTotal = document.getElementById('res-total');
+    if (resTotal) resTotal.innerText = total.toLocaleString();
     
     const name = document.getElementById('p-name').value.trim();
     const phone = document.getElementById('p-phone').value.trim();
     const email = document.getElementById('p-email').value.trim();
     
-    const canSubmit = totalQty > 0 && name && phone.length >= 8 && email.includes('@');
-    document.getElementById('submit-btn').disabled = !canSubmit;
+    // Баталгаажуулалт: Нэр, Утас (8+ орон), Имэйл (@)
+    const canSubmit = totalQty > 0 && name !== "" && phone.length >= 8 && email.includes('@');
+    const btn = document.getElementById('submit-btn');
+    if (btn) {
+        btn.disabled = !canSubmit;
+        btn.style.opacity = canSubmit ? "1" : "0.5";
+    }
 }
 
 function sendOrder() {
@@ -60,14 +68,15 @@ function sendOrder() {
         order_id: "#UK-" + Math.floor(1000 + Math.random() * 9000)
     };
 
-    // EmailJS илгээх хэсэг
-    emailjs.send("service_izdours", "g0dk3hw", params)
+    // EMAILJS РУУ ИЛГЭЭХ ХЭСЭГ
+    emailjs.send("service_izdours", "template_ix01rik", params)
     .then(function(res) {
-        alert("Захиалга амжилттай! Бид удахгүй холбогдох болно.");
+        alert("Захиалга амжилттай! Бид тантай удахгүй холбогдох болно.");
         window.location.reload();
     })
     .catch(function(err) {
-        alert("Алдаа гарлаа: " + JSON.stringify(err));
+        console.error("EmailJS Error:", err);
+        alert("Алдаа гарлаа: " + (err.text || "ID буруу эсвэл холболт тасарлаа."));
         btn.innerText = "ЗАХИАЛАХ";
         btn.disabled = false;
     });
