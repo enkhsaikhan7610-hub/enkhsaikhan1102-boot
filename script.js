@@ -1,147 +1,101 @@
-const unitPrice = 250000;
-const delFee = 15000;
-const sizes = [38, 39, 40, 41, 42, 43, 44];
-let currentOrderID = "";
-
-const langData = {
-    mn: {
-        navProducts: "Бүтээгдэхүүн", orderTitle: "Захиалга өгөх",
-        needDel: "Хүргэлт авах (+15,000₮)", btnReady: "ЗАХИАЛАХ", btnSending: "Илгээж байна...",
-        totalLabel: "НИЙТ ТӨЛӨХ", shoes: ["Сонгодог Лофер", "Уламжлалт Гутал", "Ажлын Ботинк", "Өдөр тутмын Оксфорд"]
-    },
-    en: {
-        navProducts: "Products", orderTitle: "Order Now",
-        needDel: "Delivery Service (+15,000₮)", btnReady: "CHECKOUT", btnSending: "Sending...",
-        totalLabel: "TOTAL AMOUNT", shoes: ["Classic Loafers", "Traditional Boots", "Work Boots", "Daily Oxfords"]
-    }
-};
-
-let currentLang = 'mn';
-let cart = {};
-
-function setLang(lang) {
-    currentLang = lang;
-    const d = langData[lang];
-    document.getElementById('t-nav-products').innerText = d.navProducts;
-    document.getElementById('t-products-title').innerText = d.navProducts;
-    document.getElementById('t-order-title').innerText = d.orderTitle;
-    document.getElementById('t-need-del').innerText = d.needDel;
-    document.getElementById('t-total-label').innerText = d.totalLabel;
-    document.getElementById('submit-btn').innerText = d.btnReady;
-    renderProducts();
-    calc();
+body { 
+    background-color: #000; 
+    color: #fff; 
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    padding-bottom: 100px; 
 }
 
-function renderProducts() {
-    const list = document.getElementById('product-list');
-    list.innerHTML = langData[currentLang].shoes.map((name, i) => {
-        let sizeHtml = sizes.map(sz => {
-            const key = `${i}-${sz}`;
-            return `<div class="size-item"><span>${sz}</span><input type="number" min="0" placeholder="0" value="${cart[key] || ''}" oninput="updateCart('${key}', this.value)"></div>`;
-        }).join('');
-        return `<div class="product-card"><img class="product-img" src="https://picsum.photos/400/500?random=${i}"><div class="card-content"><h3>${name}</h3><span class="price-tag">${unitPrice.toLocaleString()} ₮</span><div class="size-grid">${sizeHtml}</div></div></div>`;
-    }).join('');
+.nav-header { 
+    background: #111; 
+    padding: 15px; 
+    text-align: center; 
+    border-bottom: 1px solid #222; 
 }
 
-function updateCart(key, val) {
-    const v = parseInt(val);
-    if (isNaN(v) || v <= 0) delete cart[key];
-    else cart[key] = v;
-    calc();
+.nav-logo { height: 40px; }
+
+.section-title { 
+    text-align: center; 
+    color: #d4af37; 
+    margin: 30px 0; 
+    text-transform: uppercase; 
 }
 
-function calc() {
-    const isDel = document.getElementById('del-check').checked;
-    const name = document.getElementById('p-name').value.trim();
-    const phone = document.getElementById('p-phone').value.trim();
-    const email = document.getElementById('p-email').value.trim();
-    
-    document.getElementById('address').style.display = isDel ? 'block' : 'none';
-    
-    let totalQty = 0;
-    Object.values(cart).forEach(q => totalQty += q);
-    const totalAmount = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
-    
-    document.getElementById('res-total').innerText = totalAmount.toLocaleString();
-    
-    // ИМЭЙЛ ШАЛГАХ ЛОГИК
-    const isEmailValid = email.includes('@') && email.includes('.');
-    const canSubmit = totalQty > 0 && name.length > 1 && phone.length >= 8 && isEmailValid;
-    
-    const submitBtn = document.getElementById('submit-btn');
-    submitBtn.disabled = !canSubmit;
-    submitBtn.style.opacity = canSubmit ? "1" : "0.5";
-    
-    document.getElementById('pay-total-val').innerText = totalAmount.toLocaleString() + "₮";
+#product-list { 
+    display: flex; 
+    overflow-x: auto; 
+    gap: 15px; 
+    padding: 20px; 
 }
 
-function generateOrderID() {
-    return '#UK-' + Math.floor(1000 + Math.random() * 9000);
+.product-card { 
+    flex: 0 0 280px; 
+    background: #111; 
+    border-radius: 20px; 
+    padding: 15px; 
+    border: 1px solid #222; 
 }
 
-function sendOrder() {
-    const btn = document.getElementById('submit-btn');
-    btn.innerText = "Илгээж байна...";
-    btn.disabled = true;
-
-    currentOrderID = generateOrderID();
-    let orderDetails = "";
-    Object.keys(cart).forEach(key => {
-        const [shoeIdx, size] = key.split('-');
-        orderDetails += `${langData[currentLang].shoes[shoeIdx]} (SZ: ${size}, ${cart[key]}ш); `;
-    });
-
-    const templateParams = {
-        order_id: currentOrderID,
-        from_name: document.getElementById('p-name').value,
-        phone: document.getElementById('p-phone').value,
-        user_email: document.getElementById('p-email').value,
-        order_details: orderDetails,
-        address: document.getElementById('address').value || "Хүргэлтгүй",
-        total_price: document.getElementById('res-total').innerText + "₮"
-    };
-
-    // ТАНЫ ТEMPLATE ID: g0dk3hw
-    emailjs.send('service_izdours', 'g0dk3hw', templateParams)
-        .then(() => {
-            document.getElementById('pay-order-id').innerText = currentOrderID;
-            document.getElementById('paymentModal').style.display = 'flex';
-            const qrData = `Bank:KhasBank|Acc:5003793719|Amount:${templateParams.total_price}|Msg:${currentOrderID}`;
-            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
-            btn.innerText = langData[currentLang].btnReady;
-            btn.disabled = false;
-        });
+.product-card input { 
+    width: 100%; 
+    padding: 10px; 
+    margin-top: 10px; 
+    background: #222; 
+    border: 1px solid #333; 
+    color: #fff; 
+    border-radius: 8px; 
+    box-sizing: border-box;
 }
 
-function notifyPaymentSent() {
-    const btn = document.getElementById('payment-sent-btn');
-    btn.innerText = "Мэдэгдэж байна...";
-    btn.disabled = true;
-
-    const params = {
-        order_id: currentOrderID,
-        from_name: document.getElementById('p-name').value,
-        phone: document.getElementById('p-phone').value,
-        user_email: document.getElementById('p-email').value,
-        order_details: "Хэрэглэгч төлбөрөө шилжүүлсэн гэж мэдэгдлээ. Дансаа шалгана уу."
-    };
-
-    emailjs.send('service_izdours', 'g0dk3hw', params)
-        .then(() => {
-            document.getElementById('modal-body').innerHTML = `
-                <div style="padding: 30px 10px; text-align: center;">
-                    <div style="font-size: 50px; color: #25D366; margin-bottom: 15px;">✓</div>
-                    <h2 style="color: #d4af37; margin-bottom: 10px;">БАЯРЛАЛАА!</h2>
-                    <p style="font-size: 14px; color: #fff;">Мэдэгдэл илгээгдлээ. Бид төлбөрийг шалгаад тантай эргэж холбогдох болно.</p>
-                    <p style="margin-top: 20px; font-size: 12px; color: #777;">Дугаар: ${currentOrderID}</p>
-                    <button onclick="window.location.reload()" style="margin-top: 25px; width: 100%; padding: 12px; background: #333; color: #fff; border: none; border-radius: 10px; cursor: pointer;">Дуусгах</button>
-                </div>
-            `;
-        });
+.order-container { 
+    max-width: 450px; 
+    margin: 20px auto; 
+    padding: 20px; 
 }
 
-function closeAll() {
-    if(confirm("Захиалгын дугаараа тэмдэглэсэн үү?")) window.location.reload();
+.order-form input { 
+    width: 100%; 
+    padding: 15px; 
+    margin-bottom: 12px; 
+    border-radius: 12px; 
+    border: 1px solid #333; 
+    background: #1a1a1a; 
+    color: #fff; 
+    box-sizing: border-box; 
+    outline: none;
 }
 
-window.onload = () => setLang('mn');
+.checkbox-label { 
+    display: block; 
+    margin: 10px 0; 
+    color: #aaa; 
+    font-size: 14px; 
+}
+
+.footer-bar { 
+    position: fixed; 
+    bottom: 0; 
+    width: 100%; 
+    background: #111; 
+    padding: 15px 25px; 
+    border-top: 1px solid #222; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    box-sizing: border-box; 
+}
+
+.amount { color: #d4af37; font-size: 20px; font-weight: bold; margin-left: 10px; }
+
+.checkout-btn { 
+    background: #d4af37; 
+    color: #000; 
+    border: none; 
+    padding: 12px 35px; 
+    border-radius: 12px; 
+    font-weight: bold; 
+    cursor: pointer; 
+}
+
+.checkout-btn:disabled { opacity: 0.3; cursor: not-allowed; }
