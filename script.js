@@ -1,101 +1,76 @@
-body { 
-    background-color: #000; 
-    color: #fff; 
-    font-family: 'Segoe UI', sans-serif; 
-    margin: 0; 
-    padding-bottom: 100px; 
+const unitPrice = 250000;
+const delFee = 15000;
+let cart = {};
+const items = ["Сонгодог Лофер", "Монгол Гутал", "Ажлын Ботинк", "Оксфорд Гутал", "Чөлөөт Пүүз", "Хагас Түрийтэй", "Зуны Мокасин", "Спортын Хөнгөн", "Гоёлын Ботинк", "Өвлийн Дулаан"];
+
+// Бүтээгдэхүүнийг дэлгэцэнд гаргах
+function renderProducts() {
+    const list = document.getElementById('product-list');
+    list.innerHTML = items.map((name, i) => `
+        <div class="product-card">
+            <img src="https://picsum.photos/400/500?random=${i}" style="width:100%; border-radius:12px;">
+            <h4>${name}</h4>
+            <div style="color:#d4af37;">${unitPrice.toLocaleString()}₮</div>
+            <input type="number" min="0" placeholder="Тоо ширхэг" oninput="updateCart(${i}, this.value)">
+        </div>
+    `).join('');
 }
 
-.nav-header { 
-    background: #111; 
-    padding: 15px; 
-    text-align: center; 
-    border-bottom: 1px solid #222; 
+function updateCart(id, val) {
+    const v = parseInt(val);
+    if (v > 0) cart[id] = v; else delete cart[id];
+    calc();
 }
 
-.nav-logo { height: 40px; }
+function calc() {
+    const isDel = document.getElementById('del-check').checked;
+    document.getElementById('address').style.display = isDel ? 'block' : 'none';
 
-.section-title { 
-    text-align: center; 
-    color: #d4af37; 
-    margin: 30px 0; 
-    text-transform: uppercase; 
+    let totalQty = 0;
+    Object.values(cart).forEach(q => totalQty += q);
+    
+    const total = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
+    document.getElementById('res-total').innerText = total.toLocaleString();
+    
+    const name = document.getElementById('p-name').value.trim();
+    const phone = document.getElementById('p-phone').value.trim();
+    const email = document.getElementById('p-email').value.trim();
+    
+    const canSubmit = totalQty > 0 && name && phone.length >= 8 && email.includes('@');
+    document.getElementById('submit-btn').disabled = !canSubmit;
 }
 
-#product-list { 
-    display: flex; 
-    overflow-x: auto; 
-    gap: 15px; 
-    padding: 20px; 
+function sendOrder() {
+    const btn = document.getElementById('submit-btn');
+    btn.innerText = "Илгээж байна...";
+    btn.disabled = true;
+
+    let details = "";
+    Object.keys(cart).forEach(id => {
+        details += `${items[id]} (${cart[id]}ш); `;
+    });
+
+    const params = {
+        from_name: document.getElementById('p-name').value,
+        phone: document.getElementById('p-phone').value,
+        user_email: document.getElementById('p-email').value,
+        address: document.getElementById('address').value || "Дэлгүүрээс авах",
+        order_details: details,
+        total_price: document.getElementById('res-total').innerText + "₮",
+        order_id: "#UK-" + Math.floor(1000 + Math.random() * 9000)
+    };
+
+    // EmailJS илгээх хэсэг
+    emailjs.send("service_izdours", "g0dk3hw", params)
+    .then(function(res) {
+        alert("Захиалга амжилттай! Бид удахгүй холбогдох болно.");
+        window.location.reload();
+    })
+    .catch(function(err) {
+        alert("Алдаа гарлаа: " + JSON.stringify(err));
+        btn.innerText = "ЗАХИАЛАХ";
+        btn.disabled = false;
+    });
 }
 
-.product-card { 
-    flex: 0 0 280px; 
-    background: #111; 
-    border-radius: 20px; 
-    padding: 15px; 
-    border: 1px solid #222; 
-}
-
-.product-card input { 
-    width: 100%; 
-    padding: 10px; 
-    margin-top: 10px; 
-    background: #222; 
-    border: 1px solid #333; 
-    color: #fff; 
-    border-radius: 8px; 
-    box-sizing: border-box;
-}
-
-.order-container { 
-    max-width: 450px; 
-    margin: 20px auto; 
-    padding: 20px; 
-}
-
-.order-form input { 
-    width: 100%; 
-    padding: 15px; 
-    margin-bottom: 12px; 
-    border-radius: 12px; 
-    border: 1px solid #333; 
-    background: #1a1a1a; 
-    color: #fff; 
-    box-sizing: border-box; 
-    outline: none;
-}
-
-.checkbox-label { 
-    display: block; 
-    margin: 10px 0; 
-    color: #aaa; 
-    font-size: 14px; 
-}
-
-.footer-bar { 
-    position: fixed; 
-    bottom: 0; 
-    width: 100%; 
-    background: #111; 
-    padding: 15px 25px; 
-    border-top: 1px solid #222; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    box-sizing: border-box; 
-}
-
-.amount { color: #d4af37; font-size: 20px; font-weight: bold; margin-left: 10px; }
-
-.checkout-btn { 
-    background: #d4af37; 
-    color: #000; 
-    border: none; 
-    padding: 12px 35px; 
-    border-radius: 12px; 
-    font-weight: bold; 
-    cursor: pointer; 
-}
-
-.checkout-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+window.onload = renderProducts;
