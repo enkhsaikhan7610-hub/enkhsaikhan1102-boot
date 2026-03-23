@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>УРАН ХИЙЦ | Тансаг зэрэглэлийн гар хийцийн гутал</title>
+    <title>УРАН ХИЙЦ | Handmade Luxury Footwear</title>
     <link rel="stylesheet" href="style.css">
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
        (function(){
-          // Таны Public Key-г энд холболоо
           emailjs.init("nfT3fjYlvh2OVOO5W");
        })();
     </script>
@@ -21,20 +20,13 @@
         <a href="javascript:void(0)" id="btn-mn" onclick="setLang('mn')">MN</a>
         <a href="javascript:void(0)" id="btn-en" onclick="setLang('en')">EN</a>
     </div>
-    <img src="https://i.postimg.cc/PrZQPYHB/Luxury-Mongolian-footwear-logo-design-removebg-preview.png" class="nav-logo-small" alt="Logo">
+    <img src="https://i.postimg.cc/PrZQPYHB/Logo.png" class="nav-logo-small" alt="Logo">
     <a href="#products" id="t-nav-products" style="margin-right: 15px;">Бүтээгдэхүүн</a>
 </nav>
 
 <div class="brand-container">
-    <img src="https://i.postimg.cc/PrZQPYHB/Luxury-Mongolian-footwear-logo-design-removebg-preview.png" class="main-logo" alt="УРАН ХИЙЦ">
+    <img src="https://i.postimg.cc/PrZQPYHB/Logo.png" class="main-logo" alt="УРАН ХИЙЦ">
 </div>
-
-<section id="about">
-    <h2 class="section-title" id="t-about-title">Бидний тухай</h2>
-    <div class="about-box">
-        <p id="t-about-text">Монгол дархны уран ухаан, орчин үеийн загварын чиг хандлагыг нэгтгэн, дээд зэрэглэлийн арьсаар зөвхөн танд зориулсан гутлыг урлаж байна.</p>
-    </div>
-</section>
 
 <section id="products">
     <h2 class="section-title" id="t-products-title">Бүтээгдэхүүн</h2>
@@ -43,18 +35,16 @@
 
 <section id="order">
     <h2 class="section-title" id="t-order-title">Захиалга өгөх</h2>
-    <div class="container">
-        <div class="order-section">
-            <input type="text" id="p-name" placeholder="Таны нэр" oninput="calc()">
-            <input type="tel" id="p-phone" placeholder="Утасны дугаар" oninput="calc()">
-            
-            <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; margin: 15px 0; color: #a0a0a0;">
-                <input type="checkbox" id="del-check" onchange="calc()" style="width: 18px; height: 18px;"> 
-                <span id="t-need-del">Хүргэлт авах (+15,000₮)</span>
-            </label>
-            
-            <input type="text" id="address" placeholder="Хүргэлтийн хаяг" style="display:none;" oninput="calc()">
-        </div>
+    <div class="order-section">
+        <input type="text" id="p-name" placeholder="Таны нэр" oninput="calc()">
+        <input type="tel" id="p-phone" placeholder="Утасны дугаар" oninput="calc()">
+        
+        <label style="display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; margin: 15px 0; color: #a0a0a0;">
+            <input type="checkbox" id="del-check" onchange="calc()" style="width: 18px; height: 18px;"> 
+            <span id="t-need-del">Хүргэлт авах (+15,000₮)</span>
+        </label>
+        
+        <input type="text" id="address" placeholder="Хүргэлтийн хаяг" style="display:none;" oninput="calc()">
     </div>
 </section>
 
@@ -68,16 +58,23 @@
 
 <div id="paymentModal" class="modal">
     <div class="modal-content">
-        <h2 id="t-pay-title" style="color: #d4af37; font-size: 20px; margin-bottom: 15px;">Захиалга баталгаажуулах</h2>
-        <div style="text-align: left; background: #000; padding: 15px; border-radius: 15px; border: 1px solid #d4af37; margin-bottom: 20px;">
-            <div style="font-size: 14px; margin-bottom: 8px;">ХасБанк: <b>5003793719</b></div>
-            <div style="font-size: 14px; margin-bottom: 8px;">Нэр: <b>Б.Энхсайхан</b></div>
-            <div style="font-size: 14px; margin-bottom: 8px;">Дүн: <b id="pay-total-val" style="color:#d4af37;">0₮</b></div>
-            <div style="font-size: 14px;">Утга: <b id="pay-phone-val">--</b></div>
+        <div id="success-icon" style="font-size: 50px; color: #25D366; margin-bottom: 10px;">✓</div>
+        <h2 id="t-modal-h2" style="color: #d4af37; font-size: 18px; margin-bottom: 5px;">Захиалга хүлээн авлаа</h2>
+        <p style="font-size: 13px; color: #a0a0a0; margin-bottom: 20px;">Таны захиалга Gmail-д бүртгэгдлээ.</p>
+        
+        <div style="text-align: left; background: #000; padding: 15px; border-radius: 15px; border: 1px solid #d4af37; margin-bottom: 15px;">
+            <div style="font-size: 13px; margin-bottom: 8px;">Данс: <b>ХасБанк 5003793719</b></div>
+            <div style="font-size: 13px; margin-bottom: 8px;">Дүн: <b id="pay-total-val" style="color:#d4af37;">0₮</b></div>
+            <div style="font-size: 13px; margin-bottom: 8px;">Гүйлгээний утга: <b id="pay-order-id" style="color:#25D366;">#UK-0000</b></div>
         </div>
-        <p style="font-size: 12px; color: #ffcc00; margin-bottom: 15px;">⚠️ Төлбөр шилжүүлэхдээ гүйлгээний утга дээр утасны дугаараа заавал бичнэ үү.</p>
-        <img id="qr-img" src="" alt="QR" style="width: 150px; border-radius: 10px; border: 5px solid white; margin-bottom: 20px;">
-        <button type="button" class="close-btn" onclick="closeAll()">ХААХ</button>
+        
+        <p style="font-size: 11px; color: #ffcc00; margin-bottom: 15px;">⚠️ Гүйлгээний утга дээр дээрх захиалгын дугаарыг бичсэнээр таны захиалга шууд баталгаажна.</p>
+        
+        <img id="qr-img" src="" alt="QR" style="width: 140px; border-radius: 10px; border: 4px solid white; margin-bottom: 15px;">
+        
+        <div style="font-size: 11px; color: #777; margin-bottom: 15px;">Асуух зүйл байвал: 8851-5700</div>
+        
+        <button type="button" class="close-btn" onclick="closeAll()">Ойлголоо</button>
     </div>
 </div>
 
