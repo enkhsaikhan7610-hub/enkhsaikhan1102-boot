@@ -1,19 +1,20 @@
 const unitPrice = 250000;
 const delFee = 15000;
 let cart = {};
-const items = ["Сонгодог 3D Лофер", "Монгол Гутал", "Ажлын Ботинк", "Оксфорд Гутал", "Чөлөөт Пүүз", "Хагас Түрийтэй", "Зуны Мокасин", "Спортын Хөнгөн", "Гоёлын Ботинк", "Өвлийн Дулаан"];
+const items = ["Сонгодог Лофер", "Монгол Гутал", "Ажлын Ботинк", "Оксфорд Гутал", "Чөлөөт Пүүз", "Хагас Түрийтэй", "Зуны Мокасин", "Спортын Хөнгөн", "Гоёлын Ботинк", "Өвлийн Дулаан"];
 
+// Бүтээгдэхүүнийг дэлгэцэнд гаргах
 function renderProducts() {
     const list = document.getElementById('product-list');
-    for (let i = 1; i < items.length; i++) {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.innerHTML = `<img src="https://picsum.photos/400/500?random=${i}" style="width:100%; border-radius:12px;">
-            <h4>${items[i]}</h4>
+    if (!list) return;
+    list.innerHTML = items.map((name, i) => `
+        <div class="product-card">
+            <img src="https://picsum.photos/400/500?random=${i}" style="width:100%; border-radius:12px;">
+            <h4>${name}</h4>
             <div style="color:#d4af37;">${unitPrice.toLocaleString()}₮</div>
-            <input type="number" min="0" placeholder="Тоо ширхэг" oninput="updateCart(${i}, this.value)">`;
-        list.appendChild(card);
-    }
+            <input type="number" min="0" placeholder="Тоо ширхэг" oninput="updateCart(${i}, this.value)">
+        </div>
+    `).join('');
 }
 
 function updateCart(id, val) {
@@ -29,13 +30,22 @@ function calc() {
 
     let totalQty = 0;
     Object.values(cart).forEach(q => totalQty += q);
-    const total = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
-    document.getElementById('res-total').innerText = total.toLocaleString();
     
-    const canSubmit = totalQty > 0 && document.getElementById('p-name').value && document.getElementById('p-phone').value.length >= 8;
+    const total = (totalQty * unitPrice) + (isDel && totalQty > 0 ? delFee : 0);
+    const resTotal = document.getElementById('res-total');
+    if (resTotal) resTotal.innerText = total.toLocaleString();
+    
+    const name = document.getElementById('p-name').value.trim();
+    const phone = document.getElementById('p-phone').value.trim();
+    const email = document.getElementById('p-email').value.trim();
+    
+    // Баталгаажуулалт: Нэр, Утас (8+ орон), Имэйл (@)
+    const canSubmit = totalQty > 0 && name !== "" && phone.length >= 8 && email.includes('@');
     const btn = document.getElementById('submit-btn');
-    btn.disabled = !canSubmit;
-    btn.style.opacity = canSubmit ? "1" : "0.5";
+    if (btn) {
+        btn.disabled = !canSubmit;
+        btn.style.opacity = canSubmit ? "1" : "0.5";
+    }
 }
 
 function sendOrder() {
@@ -44,9 +54,10 @@ function sendOrder() {
     btn.disabled = true;
 
     let details = "";
-    Object.keys(cart).forEach(id => { details += `${items[id]} (${cart[id]}ш); `; });
+    Object.keys(cart).forEach(id => {
+        details += `${items[id]} (${cart[id]}ш); `;
+    });
 
-    const orderID = "#UK-" + Math.floor(1000 + Math.random() * 9000);
     const params = {
         from_name: document.getElementById('p-name').value,
         phone: document.getElementById('p-phone').value,
@@ -54,18 +65,19 @@ function sendOrder() {
         address: document.getElementById('address').value || "Дэлгүүрээс авах",
         order_details: details,
         total_price: document.getElementById('res-total').innerText + "₮",
-        order_id: orderID
+        order_id: "#UK-" + Math.floor(1000 + Math.random() * 9000)
     };
 
+    // EMAILJS РУУ ИЛГЭЭХ ХЭСЭГ
     emailjs.send("service_izdours", "template_ix01rik", params)
-    .then(function() {
-        // ЗАХИАЛГА АМЖИЛТТАЙ БОЛ ТӨЛБӨРИЙН ЦОНХЫГ ГАРГАХ
-        document.getElementById('order-id-display').innerText = orderID;
-        document.getElementById('paymentModal').style.display = 'flex';
-        btn.innerText = "ЗАХИАЛАХ";
+    .then(function(res) {
+        alert("Захиалга амжилттай! Бид тантай удахгүй холбогдох болно.");
+        window.location.reload();
     })
     .catch(function(err) {
-        alert("Алдаа гарлаа: " + err.text);
+        console.error("EmailJS Error:", err);
+        alert("Алдаа гарлаа: " + (err.text || "ID буруу эсвэл холболт тасарлаа."));
+        btn.innerText = "ЗАХИАЛАХ";
         btn.disabled = false;
     });
 }
