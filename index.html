@@ -13,8 +13,8 @@
     </script>
 
     <style>
-        :root { --gold: #d4af37; --bg: #000; --card: #111; --red: #ff4d4d; --green: #25D366; }
-        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding-bottom: 120px; }
+        :root { --gold: #d4af37; --bg: #000; --card: #111; --red: #ff4d4d; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
         
         .nav-header { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -22,7 +22,6 @@
             position: sticky; top: 0; z-index: 100; 
         }
         .nav-logo { height: 35px; }
-        .nav-right { display: flex; gap: 15px; align-items: center; }
         
         .cart-icon-btn { position: relative; background: none; border: none; cursor: pointer; padding: 5px; }
         .cart-count { 
@@ -30,25 +29,26 @@
             color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold;
         }
 
-        /* ТОМ ЗУРАГ ДЭЭРЭЭ */
-        .main-img-holder { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #000; }
-        .main-img-holder img { width: 100%; height: 100%; object-fit: cover; }
+        /* ТОМ ЗУРАГ СВАЙП ХИЙХ ХЭСЭГ */
+        .slider-container { width: 100%; aspect-ratio: 1/1; position: relative; overflow: hidden; touch-action: pan-y; }
+        .slider-wrapper { display: flex; transition: transform 0.4s ease-out; width: 100%; height: 100%; }
+        .slider-item { min-width: 100%; height: 100%; }
+        .slider-item img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* БҮТЭЭГДЭХҮҮН СОНГОХ ХЭСЭГ ДООР НЬ */
+        /* ЖИЖИГ ЗУРГУУД */
         .product-list-scroll { 
             display: flex; gap: 10px; overflow-x: auto; padding: 15px; 
             background: #0a0a0a; border-bottom: 1px solid #222; scrollbar-width: none;
         }
         .product-thumb { 
-            width: 70px; height: 70px; border-radius: 8px; flex-shrink: 0; 
-            cursor: pointer; border: 2px solid transparent; transition: 0.2s; object-fit: cover;
+            width: 65px; height: 65px; border-radius: 8px; flex-shrink: 0; 
+            cursor: pointer; border: 2px solid transparent; transition: 0.2s; object-fit: cover; opacity: 0.5;
         }
-        .product-thumb.active { border-color: var(--gold); border-width: 3px; }
+        .product-thumb.active { border-color: var(--gold); opacity: 1; border-width: 3px; }
 
         .info-section { padding: 20px; }
         .product-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; color: var(--gold); }
         .product-desc { font-size: 13px; color: #888; margin-bottom: 15px; }
-        .price-box { margin-bottom: 15px; }
         .current-price { font-size: 22px; font-weight: 800; }
 
         .selection-box { background: #151515; padding: 18px; border-radius: 12px; margin: 15px 0; border: 1px solid #222; }
@@ -56,21 +56,15 @@
         .size-btn { background: #000; border: 1px solid #333; color: #fff; padding: 10px 12px; border-radius: 6px; cursor: pointer; min-width: 42px; font-size: 13px;}
         .size-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.1); }
 
-        .qty-label { font-size: 11px; color: #666; display: block; margin-bottom: 8px; text-transform: uppercase; }
         .qty-control-main { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; background: #000; padding: 8px 12px; border-radius: 8px; width: fit-content; border: 1px solid #222; }
         .qty-btn-main { background: #222; border: none; color: #fff; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 18px; }
-        #main-qty-val { font-size: 16px; font-weight: bold; min-width: 20px; text-align: center; }
+        
+        .add-to-cart-btn { width: 100%; background: #fff; color: #000; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        .add-to-cart-btn { 
-            width: 100%; background: #fff; color: #000; border: none; padding: 15px; 
-            border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px;
-        }
-
-        /* Сагсны цонх */
         .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: none; flex-direction: column; }
         .cart-content { padding: 20px; flex: 1; overflow-y: auto; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #111; border-radius: 10px; margin-bottom: 10px; border: 1px solid #222; }
-        .remove-btn { color: var(--red); background: none; border: 1px solid var(--red); padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .remove-btn { color: var(--red); background: none; border: 1px solid var(--red); padding: 4px 8px; border-radius: 4px; font-size: 12px; }
 
         .order-form { padding: 20px; background: #111; border-top: 1px solid #222; }
         .order-form input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; background: #222; border: 1px solid #333; color: #fff; box-sizing: border-box; }
@@ -80,53 +74,51 @@
 
 <nav class="nav-header">
     <img src="https://i.postimg.cc/PrZQPYHB/Luxury-Footwear-Logo.png" class="nav-logo">
-    <div class="nav-right">
-        <a href="videos.html" style="color:var(--gold); text-decoration:none; font-size:11px; font-weight: bold; border: 1px solid var(--gold); padding: 4px 8px; border-radius: 4px;">БИЧЛЭГ</a>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="videos.html" style="color:var(--gold); text-decoration:none; font-size:11px; font-weight:bold; border:1px solid var(--gold); padding:4px 8px; border-radius:4px;">БИЧЛЭГ</a>
         <button class="cart-icon-btn" onclick="toggleCart()">
-            <span style="font-size: 20px;">🛒</span>
-            <span id="cart-count-val" class="cart-count">0</span>
+            <span>🛒</span><span id="cart-count-val" class="cart-count">0</span>
         </button>
     </div>
 </nav>
 
-<div class="product-container">
-    <div class="main-img-holder">
-        <img id="main-view" src="">
+<div class="slider-container" id="slider">
+    <div class="slider-wrapper" id="slider-wrapper">
+        </div>
+</div>
+
+<div class="product-list-scroll" id="product-list"></div>
+
+<div class="info-section">
+    <h1 id="display-title" class="product-title">Сонгоогүй</h1>
+    <p id="display-desc" class="product-desc">-</p>
+    <div class="price-box">
+        <span id="display-price" class="current-price">0₮</span>
     </div>
 
-    <div class="product-list-scroll" id="product-list"></div>
-
-    <div class="info-section">
-        <h1 id="display-title" class="product-title">Сонгоогүй</h1>
-        <p id="display-desc" class="product-desc">Гутал сонгоно уу.</p>
-        <div class="price-box">
-            <span id="display-price" class="current-price">0₮</span>
+    <div class="selection-box">
+        <span style="font-size:11px; color:#666;">ХЭМЖЭЭ СОНГОХ:</span>
+        <div class="size-options">
+            <button class="size-btn" onclick="selectSize(this)">38</button>
+            <button class="size-btn" onclick="selectSize(this)">39</button>
+            <button class="size-btn" onclick="selectSize(this)">40</button>
+            <button class="size-btn" onclick="selectSize(this)">41</button>
+            <button class="size-btn" onclick="selectSize(this)">42</button>
         </div>
 
-        <div class="selection-box">
-            <span class="qty-label">Хэмжээ сонгох (Size):</span>
-            <div class="size-options">
-                <button class="size-btn" onclick="selectSize(this)">38</button>
-                <button class="size-btn" onclick="selectSize(this)">39</button>
-                <button class="size-btn" onclick="selectSize(this)">40</button>
-                <button class="size-btn" onclick="selectSize(this)">41</button>
-                <button class="size-btn" onclick="selectSize(this)">42</button>
-            </div>
-
-            <span class="qty-label">Ширхэг (Qty):</span>
-            <div class="qty-control-main">
-                <button class="qty-btn-main" onclick="updateMainQty(-1)">−</button>
-                <span id="main-qty-val">0</span>
-                <button class="qty-btn-main" onclick="updateMainQty(1)">+</button>
-            </div>
-
-            <button class="add-to-cart-btn" onclick="addToCart()">САГСАНД НЭМЭХ</button>
+        <span style="font-size:11px; color:#666;">ШИРХЭГ:</span>
+        <div class="qty-control-main">
+            <button class="qty-btn-main" onclick="updateMainQty(-1)">−</button>
+            <span id="main-qty-val">0</span>
+            <button class="qty-btn-main" onclick="updateMainQty(1)">+</button>
         </div>
+
+        <button class="add-to-cart-btn" onclick="addToCart()">САГСАНД НЭМЭХ</button>
     </div>
 </div>
 
 <div id="cartOverlay" class="cart-overlay">
-    <div style="padding: 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; align-items: center;">
+    <div style="padding:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222;">
         <h3 style="margin:0;">Миний сагс</h3>
         <button onclick="toggleCart()" style="background:none; border:none; color:#fff; font-size:24px;">✕</button>
     </div>
@@ -134,16 +126,14 @@
     <div class="order-form">
         <input type="text" id="p-name" placeholder="Таны нэр">
         <input type="tel" id="p-phone" placeholder="Утасны дугаар">
-        <div style="display:flex; justify-content:space-between; margin:10px 0; font-size: 16px;">
-            <span>Нийт:</span>
-            <span id="cart-total" style="color:var(--gold); font-weight:bold;">0₮</span>
+        <div style="display:flex; justify-content:space-between; margin:10px 0;">
+            <span>Нийт:</span><span id="cart-total" style="color:var(--gold); font-weight:bold;">0₮</span>
         </div>
         <button class="add-to-cart-btn" style="background:var(--gold);" onclick="sendOrder()">ЗАХИАЛГА ИЛГЭЭХ</button>
     </div>
 </div>
 
 <script>
-// ТОГТМОЛ 10 БҮТЭЭГДЭХҮҮН (Энд линкээ солиорой)
 const products = [
     { id: 1, name: "Uran Black Leather", desc: "Classic black leather shoes", price: 250000, img: "https://i.postimg.cc/PrZQPYHB/Luxury-Footwear-Logo.png" },
     { id: 2, name: "Uran Brown Style", desc: "Handmade brown leather", price: 260000, img: "https://via.placeholder.com/600x600/111/gold?text=GUTAL+2" },
@@ -160,35 +150,64 @@ const products = [
 let cart = [];
 let selectedSize = "";
 let currentQty = 0;
-let currentProduct = null;
+let currentIndex = 0;
 
-// Жагсаалтыг байршуулах
-const listDiv = document.getElementById('product-list');
+const wrapper = document.getElementById('slider-wrapper');
+const thumbList = document.getElementById('product-list');
+
+// Үүсгэх
 products.forEach((p, idx) => {
-    const imgEl = document.createElement('img');
-    imgEl.src = p.img;
-    imgEl.className = 'product-thumb';
-    imgEl.onclick = () => selectProduct(p, imgEl);
-    listDiv.appendChild(imgEl);
+    // Slider-т нэмэх
+    const slide = document.createElement('div');
+    slide.className = 'slider-item';
+    slide.innerHTML = `<img src="${p.img}">`;
+    wrapper.appendChild(slide);
+
+    // Жижиг жагсаалтад нэмэх
+    const thumb = document.createElement('img');
+    thumb.src = p.img;
+    thumb.className = 'product-thumb';
+    thumb.onclick = () => goToSlide(idx);
+    thumbList.appendChild(thumb);
 });
 
-function selectProduct(p, el) {
-    currentProduct = p;
-    document.getElementById('main-view').src = p.img;
+function goToSlide(index) {
+    currentIndex = index;
+    wrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+    updateUI();
+}
+
+function updateUI() {
+    const p = products[currentIndex];
     document.getElementById('display-title').innerText = p.name;
     document.getElementById('display-desc').innerText = p.desc;
     document.getElementById('display-price').innerText = p.price.toLocaleString() + "₮";
     
-    document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
+    document.querySelectorAll('.product-thumb').forEach((t, i) => {
+        t.classList.toggle('active', i === currentIndex);
+    });
     
     currentQty = 0;
     document.getElementById('main-qty-val').innerText = "0";
 }
 
-// Эхлээд 1-р бүтээгдэхүүнийг сонгоно
-selectProduct(products[0], listDiv.firstChild);
+// Swipe Logic
+let startX = 0;
+const slider = document.getElementById('slider');
 
+slider.addEventListener('touchstart', e => startX = e.touches[0].clientX);
+slider.addEventListener('touchend', e => {
+    let diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+        if (diff > 0 && currentIndex < products.length - 1) goToSlide(currentIndex + 1);
+        else if (diff < 0 && currentIndex > 0) goToSlide(currentIndex - 1);
+    }
+});
+
+// Анхны төлөв
+goToSlide(0);
+
+// Бусад функцууд (Сагс, Хэмжээ...)
 function selectSize(btn) {
     document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -201,34 +220,24 @@ function updateMainQty(val) {
 }
 
 function addToCart() {
-    if(!selectedSize || currentQty === 0) { alert("Хэмжээ болон тоогоо сонгоно уу"); return; }
-    
-    const cartId = `${currentProduct.id}-${selectedSize}`;
+    if(!selectedSize || currentQty === 0) { alert("Сонгоно уу"); return; }
+    const p = products[currentIndex];
+    const cartId = `${p.id}-${selectedSize}`;
     const idx = cart.findIndex(i => i.cartId === cartId);
-    
-    if(idx > -1) {
-        cart[idx].qty += currentQty;
-    } else {
-        cart.push({ cartId: cartId, name: currentProduct.name, size: selectedSize, price: currentProduct.price, qty: currentQty });
-    }
-    
-    currentQty = 0;
-    document.getElementById('main-qty-val').innerText = "0";
-    updateCartUI();
-    alert("Сагсанд нэмэгдлээ");
+    if(idx > -1) cart[idx].qty += currentQty;
+    else cart.push({ cartId, name: p.name, size: selectedSize, price: p.price, qty: currentQty });
+    updateCartUI(); alert("Нэмэгдлээ");
 }
 
 function updateCartUI() {
     document.getElementById('cart-count-val').innerText = cart.reduce((s, i) => s + i.qty, 0);
     const container = document.getElementById('cartItems');
-    container.innerHTML = "";
-    let total = 0;
+    container.innerHTML = ""; let total = 0;
     cart.forEach(item => {
-        const sub = item.price * item.qty;
-        total += sub;
+        total += item.price * item.qty;
         container.innerHTML += `<div class="cart-item">
-            <div><b>${item.name}</b><br><small>Size: ${item.size} | ${item.qty}ш</small></div>
-            <div style="text-align:right;">${sub.toLocaleString()}₮<br><button class="remove-btn" onclick="removeItem('${item.cartId}')">Устгах</button></div>
+            <div><b>${item.name}</b><br><small>${item.size}р | ${item.qty}ш</small></div>
+            <div style="text-align:right;">${(item.price * item.qty).toLocaleString()}₮<br><button class="remove-btn" onclick="removeItem('${item.cartId}')">Устгах</button></div>
         </div>`;
     });
     document.getElementById('cart-total').innerText = total.toLocaleString() + "₮";
@@ -240,19 +249,12 @@ function toggleCart() { const el = document.getElementById('cartOverlay'); el.st
 function sendOrder() {
     const name = document.getElementById('p-name').value;
     const phone = document.getElementById('p-phone').value;
-    if(!name || !phone || cart.length === 0) { alert("Мэдээллээ гүйцэд оруулна уу"); return; }
-    
-    const params = {
-        from_name: name,
-        phone: phone,
-        order_details: cart.map(i => `${i.name} (${i.size}р - ${i.qty}ш)`).join(", "),
+    if(!name || !phone || cart.length === 0) return alert("Мэдээллээ гүйцэд оруулна уу");
+    emailjs.send('service_izdours', 'template_ix01rik', {
+        from_name: name, phone: phone, 
+        order_details: cart.map(i => `${i.name} (${i.size}-${i.qty}ш)`).join(", "),
         total_price: document.getElementById('cart-total').innerText
-    };
-
-    emailjs.send('service_izdours', 'template_ix01rik', params).then(() => {
-        alert("Захиалга илгээгдлээ");
-        cart = []; updateCartUI(); toggleCart();
-    });
+    }).then(() => { alert("Илгээгдлээ"); cart = []; updateCartUI(); toggleCart(); });
 }
 </script>
 </body>
