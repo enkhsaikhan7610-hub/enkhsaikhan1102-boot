@@ -47,7 +47,6 @@
         .size-btn { background: #000; border: 1px solid #444; color: #fff; padding: 10px 15px; border-radius: 8px; cursor: pointer; min-width: 45px; }
         .size-btn.active { border-color: var(--gold); color: var(--gold); background: rgba(212, 175, 55, 0.1); }
 
-        /* Нүүр хуудасны тоо ширхэг сонгох хэсэг */
         .qty-label { font-size: 12px; color: #777; display: block; margin-bottom: 10px; }
         .qty-control-main { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; background: #000; padding: 10px 15px; border-radius: 10px; width: fit-content; border: 1px solid #222; }
         .qty-btn-main { background: #333; border: none; color: #fff; width: 35px; height: 35px; border-radius: 8px; cursor: pointer; font-size: 20px; font-weight: bold; }
@@ -67,7 +66,7 @@
             display: flex; justify-content: space-between; align-items: center; 
             padding: 15px; background: #111; border-radius: 10px; margin-bottom: 10px; border: 1px solid #222;
         }
-        .remove-btn { color: var(--red); background: none; border: none; font-size: 20px; cursor: pointer; }
+        .remove-btn { color: var(--red); background: none; border: none; font-size: 16px; cursor: pointer; border: 1px solid var(--red); padding: 5px 10px; border-radius: 6px;}
 
         .order-form { padding: 20px; background: #111; border-top: 1px solid #222; }
         .order-form input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; background: #222; border: 1px solid #333; color: #fff; box-sizing: border-box; }
@@ -118,7 +117,7 @@
             <span class="qty-label">ШИРХЭГ (QUANTITY):</span>
             <div class="qty-control-main">
                 <button class="qty-btn-main" onclick="updateMainQty(-1)">−</button>
-                <span id="main-qty-val">1</span>
+                <span id="main-qty-val">0</span>
                 <button class="qty-btn-main" onclick="updateMainQty(1)">+</button>
             </div>
 
@@ -149,7 +148,7 @@
 <script>
 let cart = [];
 let selectedSize = "";
-let currentQty = 1;
+let currentQty = 0; // 0-оос эхэлдэг болгосон
 const unitPrice = 250000;
 
 function changeImg(el) {
@@ -165,12 +164,13 @@ function selectSize(btn) {
 }
 
 function updateMainQty(val) {
-    currentQty = Math.max(1, currentQty + val);
+    currentQty = Math.max(0, currentQty + val); // Хасах руу орохгүй
     document.getElementById('main-qty-val').innerText = currentQty;
 }
 
 function addToCart() {
     if(!selectedSize) { alert("Хэмжээгээ сонгоно уу"); return; }
+    if(currentQty === 0) { alert("Ширхэгээ сонгоно уу"); return; }
     
     const existingIdx = cart.findIndex(i => i.size === selectedSize);
     if(existingIdx > -1) {
@@ -179,9 +179,10 @@ function addToCart() {
         cart.push({ size: selectedSize, price: unitPrice, qty: currentQty, id: Date.now() });
     }
     
-    // Reset нүүр хэсэг
-    currentQty = 1;
-    document.getElementById('main-qty-val').innerText = "1";
+    // САГСАНД НЭМСНИЙ ДАРАА БУЦААД 0 БОЛГОХ
+    currentQty = 0;
+    document.getElementById('main-qty-val').innerText = "0";
+    
     updateCartUI();
     alert("Сагсанд нэмэгдлээ!");
 }
@@ -206,7 +207,7 @@ function updateCartUI() {
                     </div>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-weight:bold;">${itemTotal.toLocaleString()}₮</div>
+                    <div style="font-weight:bold; margin-bottom:5px;">${itemTotal.toLocaleString()}₮</div>
                     <button class="remove-btn" onclick="removeItem(${item.id})">Устгах</button>
                 </div>
             </div>
